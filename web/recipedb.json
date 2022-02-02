@@ -1,0 +1,16 @@
+{
+  "recipes": [
+    {
+      "id": 1,
+      "title": "Sphaghetti",
+      "ingredient1": "Noodles",
+      "ingredient2": "Sphaghetti"
+    },
+    {
+      "id": 1,
+      "title": "Fried Chicken",
+      "ingredient1": "Breading",
+      "ingredient2": "6 Chickem legs or thighs"
+    }
+  ]
+}
