@@ -34,12 +34,12 @@ function App() {
   }, [])
 
   // Fetch Tasks
-  const fetchTasks = async () => {
-    const resp = await fetch('http://localhost:5000/tasks')
-    const data = await resp.json()
+  // const fetchTasks = async () => {
+  //   const resp = await fetch('http://localhost:5000/tasks')
+  //   const data = await resp.json()
 
-    return data
-  }
+  //   return data
+  // }
 
   // Fetch Recipes
   const fetchRecipes = async () => {
@@ -57,7 +57,7 @@ function App() {
   //   return data
   // }
 
-  // // Add Task
+  // Add Task
   // const addTask = async (task) => {
   //   const res = await fetch('http://localhost:5000/tasks', {
   //     method: 'POST',
@@ -78,7 +78,7 @@ function App() {
 
   // Add Recipe
   const addRecipe = async (recipe) => {
-    const resp = await fetch('http://localhost:6000/recipes', {
+    const resp = await fetch('http://localhost:5500/recipes', {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
@@ -109,7 +109,7 @@ function App() {
 
   // Delete Recipe
   const deleteRecipe = async (id) => {
-    const resp = await fetch(`http://localhost:6000/recipes/${id}`, {
+    const resp = await fetch(`http://localhost:5500/recipes/${id}`, {
       method: 'DELETE',
     })
     
@@ -158,7 +158,7 @@ function App() {
                             <>
                               {showAddRecipe && <AddRecipe onAdd={addRecipe} />}
                               {recipes.length > 0 ? 
-                                (<Recipes recipes={recipes} onDelete={deleteRecipe} />) : 
+                                (<Recipes onDelete={deleteRecipe} />) : 
                                 ('No Recipes To Show')}
                             </>} />
           <Route path='/about' element={<About />} />

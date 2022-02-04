@@ -1,16 +1,22 @@
 {
   "recipes": [
     {
-      "id": 1,
-      "title": "Sphaghetti",
-      "ingredient1": "Noodles",
-      "ingredient2": "Sphaghetti"
+      "title": "Fried Chicken",
+      "ingredients": "Chicken",
+      "instructions": "",
+      "open": false
     },
     {
-      "id": 1,
-      "title": "Fried Chicken",
-      "ingredient1": "Breading",
-      "ingredient2": "6 Chickem legs or thighs"
+      "title": "Spaghetti",
+      "ingredients": "Ground Turkey",
+      "instructions": "",
+      "open": false
+    },
+    {
+      "title": "Baked Wings",
+      "ingredients": "1/2 lb of wings",
+      "instructions": "Bake chicken for 45 minutes",
+      "open": false
     }
   ]
 }
