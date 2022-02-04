@@ -11,17 +11,18 @@ body {
 }
 
 .container {
-  max-width: 500px;
+  max-width: 550px;
   margin: 30px auto;
   overflow: auto;
   min-height: 300px;
-  border: 1px solid steelblue;
+  border: 3px solid steelblue;
   padding: 30px;
   border-radius: 5px;
 }
 
 .header {
   display: flex;
+  border: 0px solid steelblue;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
@@ -91,6 +92,14 @@ body {
   font-size: 17px;
 }
 
+.form-control textarea {
+  width: 100%;
+  height: 150px;
+  margin: 5px;
+  padding: 3px 7px;
+  font-size: 17px;
+}
+
 .form-control-check {
   display: flex;
   align-items: center;
@@ -106,7 +115,84 @@ body {
   height: 20px;
 }
 
+.recipes {
+	width: 100%;
+	max-width: 768px;
+	margin: 0 auto;
+	padding: 15px;
+}
+
+.recipes .recipe {
+	margin: 15px;
+	padding: 15px;
+	background-color: #FFF;
+	border-radius: 8px;
+	box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
+
+.recipes .recipe .recipe-title {
+	position: relative;
+	font-size: 20px;
+	padding-right: 80px;
+
+	transition: all 0.4s ease;
+}
+
+.recipes .recipe .recipe-title::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	right: 0px;
+	transform: translateY(-50%);
+	width: 30px;
+	height: 30px;
+
+	background-image: url('../public/arrow-down-mint.svg');
+	background-position: center;
+	background-size: contain;
+	background-repeat: no-repeat;
+
+	transition: all 0.4s ease-out;
+}
+
+.recipes .recipe .recipe-ingredients {
+	opacity: 0;
+	max-height: 0;
+	overflow-y: hidden;
+	transition: all 0.4s ease-out;
+}
+
+.recipes .recipe .recipe-instructions {
+	opacity: 0;
+	max-height: 0;
+	overflow-y: hidden;
+	transition: all 0.4s ease-out;
+}
+
+.recipes .recipe.open .recipe-title {
+	margin-bottom: 15px;
+}
+
+.recipes .recipe.open .recipe-title::after {
+	transform: translateY(-50%) rotate(180deg);
+}
+
+.recipes .recipe.open .recipe-ingredients {
+  border: 1px solid steelblue;
+  margin: 1em;
+	max-height: 1000px;
+	opacity: 1;
+}
+
+.recipes .recipe.open .recipe-instructions {
+  border: 1px solid steelblue;
+  margin: 1em;
+	max-height: 1000px;
+	opacity: 1;
+}
+
 footer {
+  border: 0px solid steelblue;
   margin-top: 30px;
   text-align: center;
 }
