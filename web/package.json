@@ -21,7 +21,6 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "task-server": "json-server --watch taskdb.json --port 5000",
     "recipe-server": "json-server --watch recipedb.json --port 5500"
   },
   "eslintConfig": {
