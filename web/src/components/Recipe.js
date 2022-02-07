@@ -7,7 +7,7 @@ const Recipe = ({ recipe, index, toggleRecipe, onDelete }) => {
   }
 
   let instructionsFound = false
-  if (recipe.instructions.leength > 0) {
+  if (recipe.instructions.length > 0) {
     instructionsFound = true
   }
 

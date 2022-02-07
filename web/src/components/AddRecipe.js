@@ -14,9 +14,6 @@ const AddRecipe = ({ onAdd }) => {
       return
     }
 
-    // Set the default for opened to false
-    opened = false
-
     // Send add request up the chain
     onAdd({ title, ingredients, instructions, opened })
 

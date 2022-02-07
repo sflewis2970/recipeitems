@@ -25,7 +25,7 @@ const Header = ({ title, onAdd, showAdd }) => {
 // }
 
 Header.defaultProps = {
-  title: 'App Name',
+  title: 'Place App Name Here',
 }
 
 Header.propTypes = {
