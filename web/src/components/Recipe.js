@@ -1,6 +1,6 @@
 import { FaTimes } from 'react-icons/fa'
 
-const Recipe = ({ recipe, index, toggleRecipe, onDelete }) => {
+const Recipe = ({ recipe, index, toggleRecipes, onDelete }) => {
   let ingredientsFound = false
   if (recipe.ingredients.length > 0) {
     ingredientsFound = true
@@ -12,12 +12,11 @@ const Recipe = ({ recipe, index, toggleRecipe, onDelete }) => {
   }
 
   return (
-    
-    <div className={"recipe " + (recipe.open ? 'open' : '')} index={index} onClick={() => toggleRecipe(index)}>
+    <div className={"recipe " + (recipe.open ? 'open' : '')} index={index} onClick={() => toggleRecipes(index)}>
 			<div className="recipe-title">
         <label>Recipe: </label>
 
-        {recipe.title}{' '} <FaTimes style={{ color: 'red', cursor: 'pointer' }} onClick={() => onDelete(index)}/>
+        {recipe.name}{' '} <FaTimes style={{ color: 'red', cursor: 'pointer' }} onClick={() => onDelete(index)}/> 
 			</div>
 
 			<div className="recipe-ingredients">

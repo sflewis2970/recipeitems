@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 const AddRecipe = ({ onAdd }) => {
-  const [title, setTitle] = useState('')
+  const [name, setName] = useState('')
   const [ingredients, setIngredients] = useState('')
   const [instructions, setInstructions] = useState('')
   const [opened, setOpened] = useState(false)
@@ -9,15 +9,15 @@ const AddRecipe = ({ onAdd }) => {
   const onSubmit = (e) => {
     e.preventDefault()
 
-    if (!title) {
+    if (!name) {
       alert('Please add a recipe')
       return
     }
 
     // Send add request up the chain
-    onAdd({ title, ingredients, instructions, opened })
+    onAdd({ name, ingredients, instructions, opened })
 
-    setTitle('')
+    setName('')
     setIngredients('')
     setInstructions('')
     setOpened(false)
@@ -28,7 +28,7 @@ const AddRecipe = ({ onAdd }) => {
       <div className='form-control'>
         <label>Recipe</label>
 
-        <input type='text' placeholder='Add Recipe' value={title} onChange={(e) => setTitle(e.target.value)}/>
+        <input type='text' placeholder='Add Recipe' value={name} onChange={(e) => setName(e.target.value)}/>
       </div>
 
       <div className='form-control'>
