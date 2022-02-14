@@ -12,10 +12,11 @@ import About from './components/About'
 function App() {
   const [showAddRecipe, setShowAddRecipe] = useState(false)
   const [recipes, setRecipes] = useState([])
+  const beServerURL = 'http://localhost:8080'
 
   useEffect(() => {
     const getRecipes = async () => {
-      const tasksFromServer = await fetchRecipes()
+      const tasksFromServer = await getAllRecipes()
       setRecipes(tasksFromServer)
     }
 
@@ -23,8 +24,12 @@ function App() {
   }, [])
 
   // Fetch Recipes
-  const fetchRecipes = async () => {
-    const resp = await fetch('http://localhost:5500/recipes')
+  const getAllRecipes = async () => {
+    const resp = await fetch(`${beServerURL}/recipes`, {
+      method: 'GET',
+      mode: 'cors',
+      headers: {}})
+
     const data = await resp.json()
 
     return data
@@ -32,13 +37,12 @@ function App() {
 
   // Add Recipe
   const addRecipe = async (recipe) => {
-    const resp = await fetch('http://localhost:5500/recipes', {
+    const resp = await fetch(`${beServerURL}/recipe`, {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
       },
-      body: JSON.stringify(recipe),
-    })
+      body: JSON.stringify(recipe)})
 
     const data = await resp.json()
 
@@ -47,7 +51,7 @@ function App() {
 
   // Delete Recipe
   const deleteRecipe = async (id) => {
-    const resp = await fetch(`http://localhost:5500/recipes/${id}`, {
+    const resp = await fetch(`${beServerURL}/recipe/${id}`, {
       method: 'DELETE',
     })
     
