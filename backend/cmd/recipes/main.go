@@ -44,11 +44,11 @@ func CreateRecipe(c *gin.Context) {
 
 	// When a new recipe is created, a new UUID is generated
 	// to serve as the unique ID
-	uuidStr := uuid.New().String()
+	uuid := uuid.New().String()
 
-	if uuidStr != "" {
-		uuidStr = parseUUIDStr(uuidStr, "-", NumberOfGroups)
-		newRecipe.ID = uuidStr
+	if uuid != "" {
+		uuid = buildUUID(uuid, "-", NumberOfGroups)
+		newRecipe.ID = uuid
 	}
 
 	// Update data store. For now use a local data store
@@ -175,18 +175,18 @@ func extractRequestData(c *gin.Context, recipe *recipe) error {
 	return nil
 }
 
-// Parse UUID string
-func parseUUIDStr(uuidStr string, delimiter string, nbrOfGroups int) string {
-	newUUIDStr := ""
+// Build UUID string
+func buildUUID(uuid string, delimiter string, nbrOfGroups int) string {
+	newUUID := ""
 
-	uuidList := strings.Split(uuidStr, delimiter)
-	for idx, uuid := range uuidList {
-		if idx < nbrOfGroups {
-			newUUIDStr = newUUIDStr + uuid
+	uuidList := strings.Split(uuid, delimiter)
+	for key, value := range uuidList {
+		if key < nbrOfGroups {
+			newUUID = newUUID + value
 		}
 	}
 
-	return newUUIDStr
+	return newUUID
 }
 
 func main() {
