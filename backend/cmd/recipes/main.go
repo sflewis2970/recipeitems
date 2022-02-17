@@ -104,28 +104,34 @@ func UpdateRecipe(c *gin.Context) {
 		err := database.UpdateRecipe(updatedRecipe)
 
 		if err != nil {
-			fmt.Println("Error updating recipe, with error: ", err.Error())
-			c.IndentedJSON(http.StatusNotFound, gin.H{"message": err.Error()})
+			errMsg := err.Error()
+			fmt.Println("Error updating recipe, with error: ", errMsg)
+			updatedRecipe.Message = errMsg
+			c.IndentedJSON(http.StatusInternalServerError, updatedRecipe)
+
+			return
 		} else {
 			recipe, _ := database.GetRecipe(updatedRecipe.Recipe_ID)
 
-			if recipe.Recipe_ID != updatedRecipe.Recipe_ID || recipe.Name != updatedRecipe.Name &&
-				recipe.Ingredients != updatedRecipe.Ingredients || recipe.Instructions != updatedRecipe.Instructions {
-				c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Updated Failed"})
-				return
+			if recipe.Recipe_ID != updatedRecipe.Recipe_ID || recipe.Name != updatedRecipe.Name ||
+				recipe.Ingredients != updatedRecipe.Ingredients || recipe.Instructions != updatedRecipe.Instructions ||
+				recipe.Opened != updatedRecipe.Opened {
+				updatedRecipe.Message = "Updated Failed"
+				c.IndentedJSON(http.StatusInternalServerError, updatedRecipe)
+			} else {
+				updatedRecipe.Message = "Update Successful"
+				c.IndentedJSON(http.StatusOK, updatedRecipe)
 			}
 
-			c.IndentedJSON(http.StatusOK, gin.H{"message": "Update Successful"})
+			return
 		}
-	} else {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid ID"})
 	}
+
+	updatedRecipe.Message = "Invalid ID"
+	c.IndentedJSON(http.StatusBadRequest, updatedRecipe)
 }
 
 func OptionsRecipe(c *gin.Context) {
-	// c.Header("Access-Control-Allow-Origin", "http://localhost:3000")
-	// c.Header("Access-Control-Allow-Methods", "GET, OPTIONS, POST, PUT")
-	// c.Header("Access-Control-Allow-Headers", "Content-Type")
 }
 
 func DeleteRecipe(c *gin.Context) {
@@ -135,28 +141,43 @@ func DeleteRecipe(c *gin.Context) {
 	defer recipeMutex.Unlock()
 
 	recipeID := getRecipeIDFromContext(c)
+	deleteRecipe, err := database.GetRecipe(recipeID)
+	if err != nil {
+		errMsg := err.Error()
+		fmt.Println("Error finding recipe to delete, with error: ", errMsg)
+		deleteRecipe.Message = errMsg
+		c.IndentedJSON(http.StatusNotFound, deleteRecipe)
+		return
+	}
 
 	// If the request contains a bad recipe ID,
 	// return an invalid ID error message
-	if recipeID != "" {
-		err := database.DeleteRecipe(recipeID)
+	if recipeID != "" && recipeID == deleteRecipe.Recipe_ID {
+		err = database.DeleteRecipe(deleteRecipe.Recipe_ID)
 
 		if err != nil {
-			fmt.Println("Error deleting record, with error: ", err.Error())
-			c.IndentedJSON(http.StatusNotFound, gin.H{"message": err.Error()})
+			errMsg := err.Error()
+			fmt.Println("Error deleting record, with error: ", errMsg)
+			deleteRecipe.Message = errMsg
+			c.IndentedJSON(http.StatusInternalServerError, deleteRecipe)
+			return
 		} else {
-			recipe, _ := database.GetRecipe(recipeID)
+			recipe, _ := database.GetRecipe(deleteRecipe.Recipe_ID)
 
 			if recipe.Recipe_ID != "" {
-				c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Delete Failed"})
-				return
+				deleteRecipe.Message = "Delete Failed"
+				c.IndentedJSON(http.StatusInternalServerError, deleteRecipe)
+			} else {
+				deleteRecipe.Message = "Delete Successful"
+				c.IndentedJSON(http.StatusOK, deleteRecipe)
 			}
 
-			c.IndentedJSON(http.StatusOK, gin.H{"message": "Delete Successful"})
+			return
 		}
-	} else {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid ID"})
 	}
+
+	deleteRecipe.Message = "Invalid ID"
+	c.IndentedJSON(http.StatusBadRequest, deleteRecipe)
 }
 
 // Unexported functions

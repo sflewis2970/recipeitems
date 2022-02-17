@@ -40,7 +40,7 @@ func GetRecipes() ([]recipes.Recipe, error) {
 	for results.Next() {
 		var recipe recipes.Recipe
 
-		err = results.Scan(&recipe.Recipe_ID, &recipe.Name, &recipe.Ingredients, &recipe.Instructions)
+		err = results.Scan(&recipe.Recipe_ID, &recipe.Name, &recipe.Ingredients, &recipe.Instructions, &recipe.Opened)
 		if err != nil {
 			return nil, err
 		}
@@ -63,7 +63,7 @@ func GetRecipe(recipeID string) (recipes.Recipe, error) {
 	var recipe recipes.Recipe
 
 	fmt.Println("Getting a single recipe from the database")
-	err = db.QueryRow("SELECT * FROM recipes WHERE recipe_id = ?", recipeID).Scan(&recipe.Recipe_ID, &recipe.Name, &recipe.Ingredients, &recipe.Instructions)
+	err = db.QueryRow("SELECT * FROM recipes WHERE recipe_id = ?", recipeID).Scan(&recipe.Recipe_ID, &recipe.Name, &recipe.Ingredients, &recipe.Instructions, &recipe.Opened)
 	if err != nil {
 		return recipes.Recipe{}, err
 	}
@@ -79,7 +79,7 @@ func AddRecipe(recipe recipes.Recipe) *sql.Row {
 	defer db.Close()
 
 	fmt.Println("Adding a new record to the database")
-	return db.QueryRow("INSERT INTO recipes VALUES (?, ?, ?, ?)", recipe.Recipe_ID, recipe.Name, recipe.Ingredients, recipe.Instructions)
+	return db.QueryRow("INSERT INTO recipes VALUES (?, ?, ?, ?, ?)", recipe.Recipe_ID, recipe.Name, recipe.Ingredients, recipe.Instructions, recipe.Opened)
 }
 
 // Update a single record in Recipes table
@@ -91,7 +91,7 @@ func UpdateRecipe(recipe recipes.Recipe) error {
 	defer db.Close()
 
 	fmt.Println("Updating a single recipe in the database")
-	db.QueryRow("UPDATE recipes SET name = ?, ingredients = ?, instructions = ? WHERE recipe_id = ?", recipe.Name, recipe.Ingredients, recipe.Instructions, recipe.Recipe_ID)
+	db.QueryRow("UPDATE recipes SET name = ?, ingredients = ?, instructions = ?, opened = ? WHERE recipe_id = ?", recipe.Name, recipe.Ingredients, recipe.Instructions, recipe.Opened, recipe.Recipe_ID)
 
 	return nil
 }
