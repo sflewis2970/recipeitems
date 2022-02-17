@@ -6,4 +6,5 @@ type Recipe struct {
 	Ingredients  string `json:"ingredients"`
 	Instructions string `json:"instructions"`
 	Opened       bool   `json:"opened"`
+	Message      string `json:"message"`
 }
