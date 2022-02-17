@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"sync"
@@ -9,26 +10,32 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/sflewis2970/recipes/api/services/database"
+	"github.com/sflewis2970/recipes/api/services/recipes"
 )
-
-type recipe struct {
-	ID           string `json:"id"`
-	Name         string `json:"name"`
-	Ingredients  string `json:"ingredients"`
-	Instructions string `json:"instructions"`
-}
 
 const (
 	PreFlightCacheLimit = 12
 	NumberOfGroups      = 3
 )
 
-var recipes = []recipe{}
+// var recipeList []recipes.Recipe
 var recipeMutex sync.Mutex
 
 // Exported functions
 func GetRecipes(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, recipes)
+	// Call database driver to save record
+	recipeList, err := database.GetRecipes()
+
+	if err != nil {
+		fmt.Println("database error: ", err.Error())
+
+		// Send failed response to client
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+	} else {
+		// Send success response to client
+		c.IndentedJSON(http.StatusOK, recipeList)
+	}
 }
 
 func CreateRecipe(c *gin.Context) {
@@ -37,7 +44,7 @@ func CreateRecipe(c *gin.Context) {
 	recipeMutex.Lock()
 	defer recipeMutex.Unlock()
 
-	var newRecipe recipe
+	newRecipe := recipes.Recipe{}
 
 	// extract request data from request
 	extractRequestData(c, &newRecipe)
@@ -48,25 +55,37 @@ func CreateRecipe(c *gin.Context) {
 
 	if uuid != "" {
 		uuid = buildUUID(uuid, "-", NumberOfGroups)
-		newRecipe.ID = uuid
+		newRecipe.Recipe_ID = uuid
+
+		// Call database driver to save record
+		sqlRow := database.AddRecipe(newRecipe)
+
+		if sqlRow.Err() != nil {
+			fmt.Println("Error creating new recipe, with error", sqlRow.Err().Error())
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": sqlRow.Err().Error()})
+		} else {
+			c.IndentedJSON(http.StatusOK, newRecipe)
+		}
+	} else {
+		c.IndentedJSON(http.StatusInternalServerError, recipes.Recipe{})
 	}
-
-	// Update data store. For now use a local data store
-	// Evenually a MySQL database will be used
-	recipes = append(recipes, newRecipe)
-
-	c.IndentedJSON(http.StatusOK, newRecipe)
 }
 
 func GetRecipe(c *gin.Context) {
-	recipe := lookupRecipeWithContext(c)
+	recipeID := getRecipeIDFromContext(c)
 
-	if recipe.ID != "" {
-		c.IndentedJSON(http.StatusOK, recipe)
-		return
+	if recipeID != "" {
+		recipe, err := database.GetRecipe(recipeID)
+
+		if err != nil {
+			fmt.Println("Error getting recipe, with error", err.Error())
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		} else {
+			c.IndentedJSON(http.StatusOK, recipe)
+		}
+	} else {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid ID"})
 	}
-
-	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "recipe not found"})
 }
 
 func UpdateRecipe(c *gin.Context) {
@@ -75,27 +94,32 @@ func UpdateRecipe(c *gin.Context) {
 	recipeMutex.Lock()
 	defer recipeMutex.Unlock()
 
-	var updatedRecipe recipe
-
 	// extract request data from request
+	var updatedRecipe recipes.Recipe
 	extractRequestData(c, &updatedRecipe)
 
-	if updatedRecipe.ID != "" {
-		// Find recipe in data store
-		recipe := lookupRecipeByID(updatedRecipe.ID)
+	// If the request contains a bad recipe ID,
+	// return an invalid ID error message
+	if updatedRecipe.Recipe_ID != "" {
+		err := database.UpdateRecipe(updatedRecipe)
 
-		if recipe.ID != "" {
-			recipe = updatedRecipe
+		if err != nil {
+			fmt.Println("Error updating recipe, with error: ", err.Error())
+			c.IndentedJSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		} else {
+			recipe, _ := database.GetRecipe(updatedRecipe.Recipe_ID)
 
-			c.IndentedJSON(http.StatusOK, recipe)
-			return
+			if recipe.Recipe_ID != updatedRecipe.Recipe_ID || recipe.Name != updatedRecipe.Name &&
+				recipe.Ingredients != updatedRecipe.Ingredients || recipe.Instructions != updatedRecipe.Instructions {
+				c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Updated Failed"})
+				return
+			}
+
+			c.IndentedJSON(http.StatusOK, gin.H{"message": "Update Successful"})
 		}
 	} else {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid ID"})
-		return
 	}
-
-	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "recipe not found"})
 }
 
 func OptionsRecipe(c *gin.Context) {
@@ -110,62 +134,39 @@ func DeleteRecipe(c *gin.Context) {
 	recipeMutex.Lock()
 	defer recipeMutex.Unlock()
 
-	recipe := lookupRecipeWithContext(c)
+	recipeID := getRecipeIDFromContext(c)
 
-	if recipe.ID != "" {
-		pos := lookupRecipePosByID(recipe.ID)
+	// If the request contains a bad recipe ID,
+	// return an invalid ID error message
+	if recipeID != "" {
+		err := database.DeleteRecipe(recipeID)
 
-		if pos != -1 {
-			recipes := append(recipes[0:pos], recipes[pos+1:]...)
-			c.IndentedJSON(http.StatusOK, recipes)
-			return
+		if err != nil {
+			fmt.Println("Error deleting record, with error: ", err.Error())
+			c.IndentedJSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		} else {
+			recipe, _ := database.GetRecipe(recipeID)
+
+			if recipe.Recipe_ID != "" {
+				c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Delete Failed"})
+				return
+			}
+
+			c.IndentedJSON(http.StatusOK, gin.H{"message": "Delete Successful"})
 		}
 	} else {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid ID"})
-		return
 	}
-
-	c.IndentedJSON(http.StatusNotFound, gin.H{"message": "recipe not found"})
 }
 
 // Unexported functions
-// Get recipe using parameter ID in Context parameter
-func lookupRecipeWithContext(c *gin.Context) recipe {
-	id := c.Param("id")
-
-	for _, recipe := range recipes {
-		if recipe.ID == id {
-			return recipe
-		}
-	}
-
-	return recipe{}
-}
-
-// Get recipe by ID
-func lookupRecipeByID(id string) recipe {
-	for _, recipe := range recipes {
-		if recipe.ID == id {
-			return recipe
-		}
-	}
-
-	return recipe{}
-}
-
-// Get recipe positon by ID
-func lookupRecipePosByID(id string) int {
-	for idx, recipe := range recipes {
-		if recipe.ID == id {
-			return idx
-		}
-	}
-
-	return -1
+// Get Recipe ID from Context
+func getRecipeIDFromContext(c *gin.Context) string {
+	return c.Param("id")
 }
 
 // Extract Request Data
-func extractRequestData(c *gin.Context, recipe *recipe) error {
+func extractRequestData(c *gin.Context, recipe *recipes.Recipe) error {
 	err := c.BindJSON(recipe)
 
 	if err != nil {
