@@ -23,12 +23,11 @@ function App() {
     getRecipes()
   }, [])
 
-  // Fetch Recipes
+  // Fetch All Recipes
   const getAllRecipes = async () => {
     const resp = await fetch(`${beServerURL}/recipes`, {
       method: 'GET',
-      mode: 'cors',
-      headers: {}})
+    })
 
     const data = await resp.json()
 
@@ -42,11 +41,27 @@ function App() {
       headers: {
         'Content-type': 'application/json',
       },
-      body: JSON.stringify(recipe)})
+      body: JSON.stringify(recipe)
+    })
 
     const data = await resp.json()
 
     setRecipes([...recipes, data])
+  }
+
+  const updateRecipe = async (recipe) => {
+    console.log("updateRecipe Function...")
+
+    const resp = await fetch(`${beServerURL}/recipe`, {
+      method: 'PUT',
+      headers: {
+        'Content-type': 'application/json',
+      },
+      body: JSON.stringify(recipe)
+    })
+
+    const data = await resp.json()
+    return data
   }
 
   // Delete Recipe
@@ -55,20 +70,24 @@ function App() {
       method: 'DELETE',
     })
     
-    //We should control the response status to decide if we will change the state or not.
+    // We should control the response status to decide if we will change the state or not.
     resp.status === 200
       ? setRecipes(recipes.filter((recipe) => recipe.id !== id))
       : alert('Error Deleting This Recipe')
   }
 
-  const toggleRecipes = (index) => {
-    setRecipes(recipes.map((recipe, idx) => {
-      if (idx === index) {
-        recipe.open = !recipe.open
-      } else {
-        recipe.open = false;
-      }
+  const toggleRecipes = async (id) => {
+    console.log("toggleRecipes Function...")
 
+    setRecipes(recipes.map((recipe) => { 
+      if (recipe.recipe_id === id) {
+        recipe.opened = !recipe.opened
+
+        updateRecipe(recipe)
+      } else {
+        recipe.opened = false
+      }
+      
       return recipe;
     }))
   }
@@ -83,7 +102,7 @@ function App() {
                             <>
                               {showAddRecipe && <AddRecipe onAdd={addRecipe} />}
                               {recipes.length > 0 ? 
-                                (<Recipes recipes={recipes} toggleRecipes={toggleRecipes} onDelete={deleteRecipe} />) : 
+                                (<Recipes recipes={recipes} onToggle={toggleRecipes} onDelete={deleteRecipe} />) : 
                                 ('No Recipes To Show')}
                             </>} />
           <Route path='/about' element={<About />} />
