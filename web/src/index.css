@@ -55,23 +55,6 @@ body {
   width: 100%;
 }
 
-.task {
-  background: #f4f4f4;
-  margin: 5px;
-  padding: 10px 20px;
-  cursor: pointer;
-}
-
-.task.reminder {
-  border-left: 5px solid green;
-}
-
-.task h3 {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
 .add-form {
   margin-bottom: 40px;
 }
@@ -169,22 +152,22 @@ body {
 	transition: all 0.4s ease-out;
 }
 
-.recipes .recipe.open .recipe-title {
+.recipes .recipe.opened .recipe-title {
 	margin-bottom: 15px;
 }
 
-.recipes .recipe.open .recipe-title::after {
+.recipes .recipe.opened .recipe-title::after {
 	transform: translateY(-50%) rotate(180deg);
 }
 
-.recipes .recipe.open .recipe-ingredients {
+.recipes .recipe.opened .recipe-ingredients {
   border: 1px solid steelblue;
   margin: 1em;
 	max-height: 1000px;
 	opacity: 1;
 }
 
-.recipes .recipe.open .recipe-instructions {
+.recipes .recipe.opened .recipe-instructions {
   border: 1px solid steelblue;
   margin: 1em;
 	max-height: 1000px;
