@@ -1,11 +1,10 @@
-package database
+package models
 
 import (
 	"database/sql"
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/sflewis2970/recipes/api/services/recipes"
 )
 
 func open(sqlDriverName string) (*sql.DB, error) {
@@ -22,27 +21,27 @@ func open(sqlDriverName string) (*sql.DB, error) {
 }
 
 // Get all records from Recipes table
-func GetRecipes() ([]recipes.Recipe, error) {
+func GetRecipes() ([]Recipe, error) {
 	db, err := open("mysql")
 	if err != nil {
-		return nil, err
+		return []Recipe{}, err
 	}
 	defer db.Close()
 
 	fmt.Println("Getting all the recipes from the database")
 	results, err := db.Query("SELECT * FROM recipes")
 	if err != nil {
-		return nil, err
+		return []Recipe{}, err
 	}
 
-	var recipeList []recipes.Recipe
+	var recipeList []Recipe
 
 	for results.Next() {
-		var recipe recipes.Recipe
+		var recipe Recipe
 
 		err = results.Scan(&recipe.Recipe_ID, &recipe.Name, &recipe.Ingredients, &recipe.Instructions, &recipe.Opened)
 		if err != nil {
-			return nil, err
+			return []Recipe{}, err
 		}
 
 		// Build list if recipe items
@@ -53,25 +52,25 @@ func GetRecipes() ([]recipes.Recipe, error) {
 }
 
 // Get a single record from Recipes table
-func GetRecipe(recipeID string) (recipes.Recipe, error) {
+func GetRecipe(recipeID string) (Recipe, error) {
 	db, err := open("mysql")
 	if err != nil {
-		return recipes.Recipe{}, err
+		return Recipe{}, err
 	}
 	defer db.Close()
 
-	var recipe recipes.Recipe
+	var recipe Recipe
 
 	fmt.Println("Getting a single recipe from the database")
 	err = db.QueryRow("SELECT * FROM recipes WHERE recipe_id = ?", recipeID).Scan(&recipe.Recipe_ID, &recipe.Name, &recipe.Ingredients, &recipe.Instructions, &recipe.Opened)
 	if err != nil {
-		return recipes.Recipe{}, err
+		return Recipe{}, err
 	}
 
 	return recipe, nil
 }
 
-func AddRecipe(recipe recipes.Recipe) *sql.Row {
+func AddRecipe(recipe Recipe) *sql.Row {
 	db, err := open("mysql")
 	if err != nil {
 		return nil
@@ -83,7 +82,7 @@ func AddRecipe(recipe recipes.Recipe) *sql.Row {
 }
 
 // Update a single record in Recipes table
-func UpdateRecipe(recipe recipes.Recipe) error {
+func UpdateRecipe(recipe Recipe) error {
 	db, err := open("mysql")
 	if err != nil {
 		return err
