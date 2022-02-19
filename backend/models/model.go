@@ -1,4 +1,4 @@
-package recipes
+package models
 
 type Recipe struct {
 	Recipe_ID    string `json:"recipe_id"`
@@ -6,5 +6,5 @@ type Recipe struct {
 	Ingredients  string `json:"ingredients"`
 	Instructions string `json:"instructions"`
 	Opened       bool   `json:"opened"`
-	Message      string `json:"message"`
+	Message      string `json:"message,omitempty"`
 }
