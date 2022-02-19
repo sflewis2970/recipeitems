@@ -27,7 +27,6 @@ func GetRecipes(c *gin.Context) {
 		c.IndentedJSON(http.StatusInternalServerError, recipeList)
 	} else {
 		// Send success response to client
-		recipeList := append(recipeList, models.Recipe{Message: ""})
 		c.IndentedJSON(http.StatusOK, recipeList)
 	}
 }
@@ -63,7 +62,7 @@ func CreateRecipe(c *gin.Context) {
 			c.IndentedJSON(http.StatusOK, newRecipe)
 		}
 	} else {
-		newRecipe.Message = "Invalid ID"
+		newRecipe.Message = "Could not generate valid ID"
 		c.IndentedJSON(http.StatusInternalServerError, newRecipe)
 	}
 }
@@ -75,14 +74,15 @@ func GetRecipe(c *gin.Context) {
 		recipe, err := models.GetRecipe(recipeID)
 
 		if err != nil {
-			fmt.Println("Error getting recipe, with error", err.Error())
-			c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			errMsg := err.Error()
+			fmt.Println("Error getting recipe, with error", errMsg)
+			recipe.Message = errMsg
+			c.IndentedJSON(http.StatusInternalServerError, recipe)
 		} else {
 			c.IndentedJSON(http.StatusOK, recipe)
 		}
 	} else {
-		recipe := models.Recipe{}
-		recipe.Message = "Invalid ID"
+		recipe := models.Recipe{Message: "Request contains an invalid ID"}
 		c.IndentedJSON(http.StatusBadRequest, recipe)
 	}
 }
@@ -118,7 +118,6 @@ func UpdateRecipe(c *gin.Context) {
 				updatedRecipe.Message = "Updated Failed"
 				c.IndentedJSON(http.StatusInternalServerError, updatedRecipe)
 			} else {
-				updatedRecipe.Message = ""
 				c.IndentedJSON(http.StatusOK, updatedRecipe)
 			}
 
@@ -166,7 +165,6 @@ func DeleteRecipe(c *gin.Context) {
 				deleteRecipe.Message = "Delete Failed"
 				c.IndentedJSON(http.StatusInternalServerError, deleteRecipe)
 			} else {
-				deleteRecipe.Message = ""
 				c.IndentedJSON(http.StatusOK, deleteRecipe)
 			}
 		}
