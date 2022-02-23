@@ -11,19 +11,24 @@ import (
 	"github.com/sflewis2970/recipes/models"
 )
 
-const NumberOfGroups = 3
+const (
+	NumberOfGroups = 1
+	driverName     = "mysql"
+)
 
 var recipeMutex sync.Mutex
 
 func GetRecipes(c *gin.Context) {
 	// Call database driver to save record
-	recipeList, err := models.GetRecipes()
+	dbModel := models.New(driverName)
+	recipeList, err := dbModel.GetRecipes()
 
 	if err != nil {
-		fmt.Println("database error: ", err.Error())
+		errMsg := err.Error()
+		fmt.Println("database error: ", errMsg)
 
 		// Send failed response to client
-		recipeList := append(recipeList, models.Recipe{Message: err.Error()})
+		recipeList := append(recipeList, models.Recipe{Message: errMsg})
 		c.IndentedJSON(http.StatusInternalServerError, recipeList)
 	} else {
 		// Send success response to client
@@ -51,7 +56,8 @@ func CreateRecipe(c *gin.Context) {
 		newRecipe.Recipe_ID = uuid
 
 		// Call database driver to save record
-		sqlRow := models.AddRecipe(newRecipe)
+		dbModel := models.New(driverName)
+		sqlRow := dbModel.AddRecipe(newRecipe)
 
 		if sqlRow.Err() != nil {
 			errMsg := sqlRow.Err().Error()
@@ -71,7 +77,8 @@ func GetRecipe(c *gin.Context) {
 	recipeID := getRecipeIDFromContext(c)
 
 	if recipeID != "" {
-		recipe, err := models.GetRecipe(recipeID)
+		dbModel := models.New(driverName)
+		recipe, err := dbModel.GetRecipe(recipeID)
 
 		if err != nil {
 			errMsg := err.Error()
@@ -100,7 +107,8 @@ func UpdateRecipe(c *gin.Context) {
 	// If the request contains a bad recipe ID,
 	// return an invalid ID error message
 	if updatedRecipe.Recipe_ID != "" {
-		err := models.UpdateRecipe(updatedRecipe)
+		dbModel := models.New(driverName)
+		err := dbModel.UpdateRecipe(updatedRecipe)
 
 		if err != nil {
 			errMsg := err.Error()
@@ -110,7 +118,7 @@ func UpdateRecipe(c *gin.Context) {
 
 			return
 		} else {
-			recipe, _ := models.GetRecipe(updatedRecipe.Recipe_ID)
+			recipe, _ := dbModel.GetRecipe(updatedRecipe.Recipe_ID)
 
 			if recipe.Recipe_ID != updatedRecipe.Recipe_ID || recipe.Name != updatedRecipe.Name ||
 				recipe.Ingredients != updatedRecipe.Ingredients || recipe.Instructions != updatedRecipe.Instructions ||
@@ -139,7 +147,8 @@ func DeleteRecipe(c *gin.Context) {
 	defer recipeMutex.Unlock()
 
 	recipeID := getRecipeIDFromContext(c)
-	deleteRecipe, err := models.GetRecipe(recipeID)
+	dbModel := models.New(driverName)
+	deleteRecipe, err := dbModel.GetRecipe(recipeID)
 	if err != nil {
 		errMsg := err.Error()
 		fmt.Println("Error finding recipe to delete, with error: ", errMsg)
@@ -151,7 +160,7 @@ func DeleteRecipe(c *gin.Context) {
 	// If the request contains a bad recipe ID,
 	// return an invalid ID error message
 	if recipeID != "" && recipeID == deleteRecipe.Recipe_ID {
-		err = models.DeleteRecipe(deleteRecipe.Recipe_ID)
+		err = dbModel.DeleteRecipe(deleteRecipe.Recipe_ID)
 
 		if err != nil {
 			errMsg := err.Error()
@@ -159,7 +168,7 @@ func DeleteRecipe(c *gin.Context) {
 			deleteRecipe.Message = errMsg
 			c.IndentedJSON(http.StatusInternalServerError, deleteRecipe)
 		} else {
-			recipe, _ := models.GetRecipe(deleteRecipe.Recipe_ID)
+			recipe, _ := dbModel.GetRecipe(deleteRecipe.Recipe_ID)
 
 			if recipe.Recipe_ID != "" {
 				deleteRecipe.Message = "Delete Failed"
