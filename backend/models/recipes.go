@@ -7,11 +7,25 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func open(sqlDriverName string) (*sql.DB, error) {
+const dbName = "root:devStation@tcp(127.0.0.1:3306)/maindb"
+
+type DBModel interface {
+	open(driverName string) (*sql.DB, error)
+	GetRecipes() ([]Recipe, error)
+	AddRecipe(recipe Recipe) *sql.Row
+	UpdateRecipe(recipe Recipe) error
+	DeleteRecipe(recipeID string) error
+}
+
+type dbModel struct {
+	driverName string
+}
+
+func (dbm *dbModel) open(sqlDriverName string) (*sql.DB, error) {
 	fmt.Println("Opening MySQL database")
 
 	// Open database connection
-	db, err := sql.Open(sqlDriverName, "root:devStation@tcp(127.0.0.1:3306)/maindb")
+	db, err := sql.Open(sqlDriverName, dbName)
 
 	if err != nil {
 		return nil, err
@@ -21,8 +35,8 @@ func open(sqlDriverName string) (*sql.DB, error) {
 }
 
 // Get all records from Recipes table
-func GetRecipes() ([]Recipe, error) {
-	db, err := open("mysql")
+func (dbm *dbModel) GetRecipes() ([]Recipe, error) {
+	db, err := dbm.open(dbm.driverName)
 	if err != nil {
 		return []Recipe{}, err
 	}
@@ -52,8 +66,8 @@ func GetRecipes() ([]Recipe, error) {
 }
 
 // Get a single record from Recipes table
-func GetRecipe(recipeID string) (Recipe, error) {
-	db, err := open("mysql")
+func (dbm *dbModel) GetRecipe(recipeID string) (Recipe, error) {
+	db, err := dbm.open(dbm.driverName)
 	if err != nil {
 		return Recipe{}, err
 	}
@@ -70,8 +84,8 @@ func GetRecipe(recipeID string) (Recipe, error) {
 	return recipe, nil
 }
 
-func AddRecipe(recipe Recipe) *sql.Row {
-	db, err := open("mysql")
+func (dbm *dbModel) AddRecipe(recipe Recipe) *sql.Row {
+	db, err := dbm.open(dbm.driverName)
 	if err != nil {
 		return nil
 	}
@@ -82,8 +96,8 @@ func AddRecipe(recipe Recipe) *sql.Row {
 }
 
 // Update a single record in Recipes table
-func UpdateRecipe(recipe Recipe) error {
-	db, err := open("mysql")
+func (dbm *dbModel) UpdateRecipe(recipe Recipe) error {
+	db, err := dbm.open(dbm.driverName)
 	if err != nil {
 		return err
 	}
@@ -96,8 +110,8 @@ func UpdateRecipe(recipe Recipe) error {
 }
 
 // Delete a single record from Recipes table
-func DeleteRecipe(recipeID string) error {
-	db, err := open("mysql")
+func (dbm *dbModel) DeleteRecipe(recipeID string) error {
+	db, err := dbm.open(dbm.driverName)
 	if err != nil {
 		return err
 	}
@@ -107,4 +121,8 @@ func DeleteRecipe(recipeID string) error {
 	db.QueryRow("DELETE FROM recipes WHERE recipe_id = ?", recipeID)
 
 	return nil
+}
+
+func New(driverName string) *dbModel {
+	return &dbModel{driverName: driverName}
 }
