@@ -2,7 +2,7 @@ package models
 
 import (
 	"database/sql"
-	"fmt"
+	"log"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -22,7 +22,7 @@ type dbModel struct {
 }
 
 func (dbm *dbModel) open(sqlDriverName string) (*sql.DB, error) {
-	fmt.Println("Opening MySQL database")
+	log.Println("Opening MySQL database")
 
 	// Open database connection
 	db, err := sql.Open(sqlDriverName, dbName)
@@ -42,7 +42,7 @@ func (dbm *dbModel) GetRecipes() ([]Recipe, error) {
 	}
 	defer db.Close()
 
-	fmt.Println("Getting all the recipes from the database")
+	log.Println("Getting all the recipes from the database")
 	results, err := db.Query("SELECT * FROM recipes")
 	if err != nil {
 		return []Recipe{}, err
@@ -75,7 +75,7 @@ func (dbm *dbModel) GetRecipe(recipeID string) (Recipe, error) {
 
 	var recipe Recipe
 
-	fmt.Println("Getting a single recipe from the database")
+	log.Println("Getting a single recipe from the database")
 	err = db.QueryRow("SELECT * FROM recipes WHERE recipe_id = ?", recipeID).Scan(&recipe.Recipe_ID, &recipe.Name, &recipe.Ingredients, &recipe.Instructions, &recipe.Opened)
 	if err != nil {
 		return Recipe{}, err
@@ -91,7 +91,7 @@ func (dbm *dbModel) AddRecipe(recipe Recipe) *sql.Row {
 	}
 	defer db.Close()
 
-	fmt.Println("Adding a new record to the database")
+	log.Println("Adding a new record to the database")
 	return db.QueryRow("INSERT INTO recipes VALUES (?, ?, ?, ?, ?)", recipe.Recipe_ID, recipe.Name, recipe.Ingredients, recipe.Instructions, recipe.Opened)
 }
 
@@ -103,7 +103,7 @@ func (dbm *dbModel) UpdateRecipe(recipe Recipe) error {
 	}
 	defer db.Close()
 
-	fmt.Println("Updating a single recipe in the database")
+	log.Println("Updating a single recipe in the database")
 	db.QueryRow("UPDATE recipes SET name = ?, ingredients = ?, instructions = ?, opened = ? WHERE recipe_id = ?", recipe.Name, recipe.Ingredients, recipe.Instructions, recipe.Opened, recipe.Recipe_ID)
 
 	return nil
@@ -117,12 +117,15 @@ func (dbm *dbModel) DeleteRecipe(recipeID string) error {
 	}
 	defer db.Close()
 
-	fmt.Println("deleting a single recipe from the database")
+	log.Println("deleting a single recipe from the database")
 	db.QueryRow("DELETE FROM recipes WHERE recipe_id = ?", recipeID)
 
 	return nil
 }
 
 func New(driverName string) *dbModel {
-	return &dbModel{driverName: driverName}
+	pDBModel := new(dbModel)
+	pDBModel.driverName = driverName
+
+	return pDBModel
 }
