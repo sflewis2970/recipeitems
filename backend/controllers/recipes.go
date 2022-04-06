@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"sync"
@@ -25,7 +26,7 @@ func GetRecipes(c *gin.Context) {
 
 	if err != nil {
 		errMsg := err.Error()
-		fmt.Println("database error: ", errMsg)
+		log.Println("database error: ", errMsg)
 
 		// Send failed response to client
 		recipeList := append(recipeList, models.Recipe{Message: errMsg})
