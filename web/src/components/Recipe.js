@@ -14,8 +14,6 @@ const Recipe = ({ recipe, onToggle, onDelete }) => {
   return (
     <div className={"recipe" + (recipe.opened ? ' opened' : '')} onClick={() => onToggle(recipe.recipe_id)}>
 			<div className="recipe-title">
-        <label>Recipe: </label>
-
         {recipe.name}{' '} 
         <FaTimes style={{ color: 'red', cursor: 'pointer' }} onClick={() => onDelete(recipe.recipe_id)}/> 
 			</div>
