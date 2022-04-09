@@ -26,21 +26,21 @@ const AddRecipe = ({ onAdd }) => {
   return (
     <form className='add-form' onSubmit={onSubmit}>
       <div className='form-control'>
-        <label>Recipe</label>
+        <label htmlFor="name">Recipe</label>
 
-        <input type='text' placeholder='Add Recipe' value={name} onChange={(e) => setName(e.target.value)}/>
+        <input id="name" type='text' placeholder='Add Recipe' value={name} onChange={(e) => setName(e.target.value)}/>
       </div>
 
       <div className='form-control'>
-        <label>Ingredients</label>
+        <label htmlFor="ingredients">Ingredients</label>
 
-        <textarea placeholder='Add Ingredients' value={ingredients} onChange={(e) => setIngredients(e.target.value)}/>
+        <textarea id="ingredients" placeholder='Add Ingredients' value={ingredients} onChange={(e) => setIngredients(e.target.value)}/>
       </div>
 
       <div className='form-control'>
-        <label>Instructions</label>
+        <label htmlFor="instructions">Instructions</label>
 
-        <textarea placeholder='Add Instructions' value={instructions} onChange={(e) => setInstructions(e.target.value)}/>
+        <textarea id="instructions" placeholder='Add Instructions' value={instructions} onChange={(e) => setInstructions(e.target.value)}/>
       </div>
 
       <input type='submit' value='Save Recipe' className='btn btn-block' />

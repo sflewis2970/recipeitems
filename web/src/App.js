@@ -7,17 +7,19 @@ import Header from './components/Header'
 import Footer from './components/Footer'
 import Recipes from './components/Recipes'
 import AddRecipe from './components/AddRecipe'
+import Register from './components/modals/Register'
+import Login from './components/modals/Login'
 import About from './components/About'
 
 function App() {
   const [showAddRecipe, setShowAddRecipe] = useState(false)
   const [recipes, setRecipes] = useState([])
-  const beServerURL = 'http://localhost:8080'
+  const recipesServerURL = 'http://localhost:8080'
 
   useEffect(() => {
     const getRecipes = async () => {
-      const tasksFromServer = await getAllRecipes()
-      setRecipes(tasksFromServer)
+      const recipesFromServer = await getAllRecipes()
+      setRecipes(recipesFromServer)
     }
 
     getRecipes()
@@ -25,7 +27,7 @@ function App() {
 
   // Fetch All Recipes
   const getAllRecipes = async () => {
-    const resp = await fetch(`${beServerURL}/recipes`, {
+    const resp = await fetch(`${recipesServerURL}/api/recipes`, {
       method: 'GET',
     })
 
@@ -36,7 +38,7 @@ function App() {
 
   // Add Recipe
   const addRecipe = async (recipe) => {
-    const resp = await fetch(`${beServerURL}/recipe`, {
+    const resp = await fetch(`${recipesServerURL}/api/recipes`, {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
@@ -50,9 +52,7 @@ function App() {
   }
 
   const updateRecipe = async (recipe) => {
-    console.log("updateRecipe Function...")
-
-    const resp = await fetch(`${beServerURL}/recipe`, {
+    const resp = await fetch(`${recipesServerURL}/api/recipes`, {
       method: 'PUT',
       headers: {
         'Content-type': 'application/json',
@@ -66,7 +66,7 @@ function App() {
 
   // Delete Recipe
   const deleteRecipe = async (id) => {
-    const resp = await fetch(`${beServerURL}/recipe/${id}`, {
+    const resp = await fetch(`${recipesServerURL}/api/recipe/${id}`, {
       method: 'DELETE',
     })
     
@@ -92,10 +92,40 @@ function App() {
     }))
   }
 
+  // Register User
+  const registerUser = async (user) => {
+    const resp = await fetch(`${recipesServerURL}/api/register`, {
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/json',
+      },
+      body: JSON.stringify(user)
+    })
+
+    const data = await resp.json()
+
+    return data
+  }
+
+  // Login User
+  const loginUser = async (user) => {
+    const resp = await fetch(`${recipesServerURL}/api/register`, {
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/json',
+      },
+      body: JSON.stringify(user)
+    })
+
+    const data = await resp.json()
+
+    return data
+  }
+  
   return (
     <Router>
       <div className='container'>
-        <Header onAdd={() => setShowAddRecipe(!showAddRecipe)} showAdd={showAddRecipe} title='Recipe Manager'/>
+        <Header title='Recipe Manager' showAdd={showAddRecipe} onAdd={() => setShowAddRecipe(!showAddRecipe)} />
 
         <Routes>
           <Route path='/' element={
